@@ -18,31 +18,31 @@ export default function Landing() {
           <p className="text-xl text-blue-100 max-w-2xl mx-auto">The unified platform connecting patients, doctors, and hospital administration for continuous care.</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-6 items-stretch">
           {/* Patient Portal Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Link to="/patient" className="block group bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl hover:bg-white/20 transition-all hover:-translate-y-2">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="h-full">
+            <Link to="/patient" className="h-full flex flex-col group bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl hover:bg-white/20 hover:shadow-2xl transition-all hover:-translate-y-2">
               <HeartPulse className="w-12 h-12 text-rose-400 mb-6 group-hover:scale-110 transition-transform" />
               <h2 className="text-2xl font-bold text-white mb-2">Patient Portal</h2>
-              <p className="text-blue-100/70 text-sm">Access your care plan, log vitals, and connect with your doctor.</p>
+              <p className="text-blue-100/70 text-sm flex-grow">Access your care plan, log vitals, and connect with your doctor.</p>
             </Link>
           </motion.div>
 
           {/* Doctor Portal Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Link to="/doctor" className="block group bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl hover:bg-white/20 transition-all hover:-translate-y-2">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="h-full">
+            <Link to="/doctor" className="h-full flex flex-col group bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl hover:bg-white/20 hover:shadow-2xl transition-all hover:-translate-y-2">
               <Stethoscope className="w-12 h-12 text-blue-400 mb-6 group-hover:scale-110 transition-transform" />
               <h2 className="text-2xl font-bold text-white mb-2">Doctor Portal</h2>
-              <p className="text-blue-100/70 text-sm">Monitor patients, update follow-up plans, and review alerts.</p>
+              <p className="text-blue-100/70 text-sm flex-grow">Monitor patients, update follow-up plans, and review alerts.</p>
             </Link>
           </motion.div>
 
           {/* Admin Portal Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <Link to="/admin" className="block group bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl hover:bg-white/20 transition-all hover:-translate-y-2">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="h-full">
+            <Link to="/admin" className="h-full flex flex-col group bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl hover:bg-white/20 hover:shadow-2xl transition-all hover:-translate-y-2">
               <Building2 className="w-12 h-12 text-emerald-400 mb-6 group-hover:scale-110 transition-transform" />
               <h2 className="text-2xl font-bold text-white mb-2">Hospital Admin</h2>
-              <p className="text-blue-100/70 text-sm">Manage staff, allocate doctors to patients by root cause, and view analytics.</p>
+              <p className="text-blue-100/70 text-sm flex-grow">Manage staff, allocate doctors to patients by root cause, and view analytics.</p>
             </Link>
           </motion.div>
         </div>
