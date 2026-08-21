@@ -2,16 +2,20 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Building2, Search, ActivitySquare, UserPlus, Users, FileText, ChevronLeft, CheckCircle2, ChevronRight, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getPatients, savePatients } from './lib/mockDB';
+import { getPatients, savePatients, getDoctors } from './lib/mockDB';
 
 export default function AdminPortal() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('new');
   const [patients, setPatients] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
 
   useEffect(() => {
     // Poll local storage to simulate realtime DB sync for Vercel demo
-    const load = () => setPatients(getPatients());
+    const load = () => {
+      setPatients(getPatients());
+      setDoctors(getDoctors());
+    };
     load();
     const int = setInterval(load, 2000);
     return () => clearInterval(int);
@@ -22,8 +26,8 @@ export default function AdminPortal() {
   const onboard = patients.filter(p => p.status === 'onboard');
   const records = patients.filter(p => p.status === 'record');
 
-  const handleAssignDoctor = (id: string, doctor: string) => {
-    const updated = patients.map(p => p.uniqueId === id ? { ...p, status: 'queue', assignedDoctor: doctor } : p);
+  const handleAssignDoctor = (id: string, doc: any) => {
+    const updated = patients.map(p => p.uniqueId === id ? { ...p, status: 'queue', assignedDoctor: doc.name, assignedDoctorId: doc.id } : p);
     savePatients(updated);
     setPatients(updated);
   };
@@ -93,9 +97,9 @@ export default function AdminPortal() {
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      {['Dr. Smith (Cardio)', 'Dr. Jones (Neuro)', 'Dr. Lee (Gen)'].map(doc => (
-                        <button key={doc} onClick={() => handleAssignDoctor(p.uniqueId, doc)} className="px-4 py-2 bg-slate-800 hover:bg-emerald-600 border border-white/10 rounded-xl text-sm font-semibold transition-colors">
-                          Assign {doc}
+                      {doctors.length === 0 ? <span className="text-rose-400 text-sm">No doctors registered yet. Register a doctor first.</span> : doctors.map(doc => (
+                        <button key={doc.id} onClick={() => handleAssignDoctor(p.uniqueId, doc)} className="px-4 py-2 bg-slate-800 hover:bg-emerald-600 border border-white/10 rounded-xl text-sm font-semibold transition-colors">
+                          Assign {doc.name} ({doc.specialty})
                         </button>
                       ))}
                     </div>
@@ -117,9 +121,15 @@ export default function AdminPortal() {
                         <h3 className="text-xl font-bold">{p.name}</h3>
                         <span className="text-slate-500 text-sm">({p.uniqueId})</span>
                       </div>
-                      <p className="text-emerald-400 text-sm font-medium mb-3">Assigned to: {p.assignedDoctor}</p>
+                      <p className="text-emerald-400 text-sm font-medium mb-1">Assigned to: {p.assignedDoctor}</p>
                       
-                      <div className="flex gap-3">
+                      {p.testsRequested && p.testsRequested.length > 0 && (
+                        <div className="mb-3 text-sm text-yellow-400">
+                          <strong>Test Requested by Doctor:</strong> {p.testsRequested.join(', ')}
+                        </div>
+                      )}
+
+                      <div className="flex gap-3 mt-2">
                         <button onClick={() => handleUploadTest(p.uniqueId)} className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg text-xs font-semibold hover:bg-blue-500/30 transition">
                           <Upload className="w-3 h-3" /> Upload Test Results
                         </button>

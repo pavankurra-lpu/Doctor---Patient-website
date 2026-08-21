@@ -379,21 +379,68 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6">
             <div className="flex items-center gap-2 mb-6">
               <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><ClipboardList className="w-5 h-5" /></div>
-              <h3 className="font-bold text-white text-lg">Prescription & Plan</h3>
+              <h3 className="font-bold text-white text-lg">Prescription & Care Plan</h3>
             </div>
-            <ul className="space-y-4">
-              {tasks.map((task, i) => (
-                <motion.li key={task.id} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.4 + (i * 0.1) }} className={`flex items-center gap-4 p-4 rounded-2xl transition-all cursor-pointer border ${task.done ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-white/5 border-white/5 hover:bg-white/10'}`} onClick={() => toggleTask(task.id)}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shrink-0 ${task.done ? 'bg-emerald-500 text-slate-900 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'border-2 border-slate-600'}`}>
-                    {task.done && <ShieldCheck className="w-5 h-5"/>}
+            
+            {patientData?.diagnosis && (
+              <div className="mb-6 p-4 bg-white/5 rounded-2xl border border-white/10">
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Official Diagnosis</p>
+                <p className="text-white font-medium">{patientData.diagnosis}</p>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Medication Schedule</p>
+              
+              {patientData?.medications?.morning && (
+                <div className="flex items-center justify-between p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400">🌅</div>
+                    <div>
+                      <p className="font-bold text-orange-100">Morning</p>
+                      <p className="text-sm text-orange-400/70">{patientData.medications.morning}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`font-semibold truncate transition-all duration-300 ${task.done ? 'text-emerald-400 line-through opacity-70' : 'text-slate-200'}`}>{task.text}</p>
-                    <p className={`text-xs transition-colors ${task.done ? 'text-emerald-500/50' : 'text-slate-500'}`}>{task.target}</p>
+                </div>
+              )}
+
+              {patientData?.medications?.afternoon && (
+                <div className="flex items-center justify-between p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400">☀️</div>
+                    <div>
+                      <p className="font-bold text-yellow-100">Afternoon</p>
+                      <p className="text-sm text-yellow-400/70">{patientData.medications.afternoon}</p>
+                    </div>
                   </div>
-                </motion.li>
-              ))}
-            </ul>
+                </div>
+              )}
+
+              {patientData?.medications?.night && (
+                <div className="flex items-center justify-between p-4 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">🌙</div>
+                    <div>
+                      <p className="font-bold text-indigo-100">Night</p>
+                      <p className="text-sm text-indigo-400/70">{patientData.medications.night}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!patientData?.medications?.morning && !patientData?.medications?.afternoon && !patientData?.medications?.night && (
+                <p className="text-slate-500 italic text-sm">No medications prescribed yet.</p>
+              )}
+            </div>
+            
+            {patientData?.testsRequested && patientData.testsRequested.length > 0 && (
+              <div className="mt-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl">
+                <p className="text-xs font-bold text-rose-500 uppercase tracking-widest mb-1">Required Tests</p>
+                <ul className="list-disc list-inside text-rose-200 text-sm">
+                  {patientData.testsRequested.map((t: string, i: number) => <li key={i}>{t}</li>)}
+                </ul>
+              </div>
+            )}
           </motion.div>
         )}
       </div>
