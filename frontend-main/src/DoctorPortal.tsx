@@ -1,0 +1,1 @@
+export default function DoctorPortal() { return <div className="p-10">Doctor Portal Construction</div> }
