@@ -208,20 +208,34 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
     { id: 2, text: 'Take Metformin 500mg', target: 'With breakfast', done: false }
   ]);
 
+  const [patientData, setPatientData] = useState<any>(null);
+
+  useEffect(() => {
+    // Poll the mock DB to check if Admin has assigned a doctor yet
+    const checkStatus = () => {
+      const allPatients = getPatients();
+      const current = allPatients.find((p: any) => p.uniqueId === uniqueId);
+      if (current) setPatientData(current);
+    };
+    checkStatus();
+    const int = setInterval(checkStatus, 2000);
+    return () => clearInterval(int);
+  }, [uniqueId]);
+
   const toggleTask = (id: number) => {
     setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
   };
 
+  const isAssigned = patientData && patientData.status !== 'new_registration';
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-slate-950 text-slate-100 pb-24 relative overflow-hidden font-sans">
       
-      {/* Background Orbs (Kokonut / ReactBits Aesthetic) */}
       <div className="absolute top-[-20%] left-[-10%] w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none" />
       
       <div className="max-w-md mx-auto p-6 space-y-8 mt-6 relative z-10">
         
-        {/* Nav Bar */}
         <div className="flex items-center justify-between">
           <button onClick={onLogout} className="text-slate-400 hover:text-white transition flex items-center text-sm font-medium bg-white/5 px-4 py-2 rounded-full border border-white/10 hover:bg-white/10 backdrop-blur-md">
             <ChevronLeft className="w-4 h-4 mr-1"/> Exit
@@ -229,7 +243,6 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
           <div className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 font-mono text-sm tracking-widest">{uniqueId}</div>
         </div>
 
-        {/* Header */}
         <header className="flex justify-between items-end">
           <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
             <p className="text-sm text-slate-400 mb-1">Welcome back,</p>
@@ -238,46 +251,66 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
           <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-blue-500/20 border border-white/10">{name.charAt(0) || 'P'}</div>
         </header>
 
-        {/* Vitals Glass Card */}
+        {/* Status Alert */}
+        {!isAssigned && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 flex items-start gap-3">
+            <div className="mt-0.5 text-yellow-500 animate-pulse"><ActivitySquare className="w-5 h-5" /></div>
+            <div>
+              <h3 className="font-bold text-yellow-500 text-sm">Awaiting Doctor Assignment</h3>
+              <p className="text-xs text-yellow-500/70 mt-1">Your case is currently being reviewed by the Hospital Authority. Your full care plan will appear here once a doctor is assigned.</p>
+            </div>
+          </motion.div>
+        )}
+
+        {isAssigned && patientData?.assignedDoctor && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
+            <div className="text-emerald-500"><ShieldCheck className="w-5 h-5" /></div>
+            <div>
+              <h3 className="font-bold text-emerald-500 text-sm">Doctor Assigned</h3>
+              <p className="text-xs text-emerald-500/70 mt-0.5">You are under the care of <strong className="text-emerald-400">{patientData.assignedDoctor}</strong></p>
+            </div>
+          </motion.div>
+        )}
+
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="relative group">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500" />
           <div className="relative bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full" />
-            <h2 className="text-slate-400 text-sm font-medium mb-2 flex items-center gap-2"><HeartPulse className="w-4 h-4 text-blue-400" /> Latest Vitals</h2>
-            <div className="flex items-baseline gap-2 mb-6">
-              <p className="text-5xl font-black text-white">118</p>
-              <p className="text-slate-400 text-sm font-medium">mg/dL</p>
-            </div>
-            <div className="flex justify-between items-center pt-4 border-t border-white/5">
-              <div>
-                <p className="text-slate-500 text-xs">Updated Today</p>
-                <p className="text-sm font-medium text-slate-300">8:30 AM</p>
+            <h2 className="text-slate-400 text-sm font-medium mb-2 flex items-center gap-2"><HeartPulse className="w-4 h-4 text-blue-400" /> Initial Vitals (At Visit)</h2>
+            <div className="flex justify-between items-end">
+              <div className="flex items-baseline gap-2 mb-2 mt-4">
+                <p className="text-4xl font-black text-white">84</p>
+                <p className="text-slate-400 text-sm font-medium">bpm</p>
               </div>
-              <div className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20">Normal Range</div>
+              <div className="flex items-baseline gap-2 mb-2">
+                <p className="text-4xl font-black text-white">118</p>
+                <p className="text-slate-400 text-sm font-medium">mg/dL</p>
+              </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Interactive Checklist (Shadcn aesthetic) */}
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><ClipboardList className="w-5 h-5" /></div>
-            <h3 className="font-bold text-white text-lg">Action Plan</h3>
-          </div>
-          <ul className="space-y-4">
-            {tasks.map((task, i) => (
-              <motion.li key={task.id} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.4 + (i * 0.1) }} className={`flex items-center gap-4 p-4 rounded-2xl transition-all cursor-pointer border ${task.done ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-white/5 border-white/5 hover:bg-white/10'}`} onClick={() => toggleTask(task.id)}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shrink-0 ${task.done ? 'bg-emerald-500 text-slate-900 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'border-2 border-slate-600'}`}>
-                  {task.done && <ShieldCheck className="w-5 h-5"/>}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={`font-semibold truncate transition-all duration-300 ${task.done ? 'text-emerald-400 line-through opacity-70' : 'text-slate-200'}`}>{task.text}</p>
-                  <p className={`text-xs transition-colors ${task.done ? 'text-emerald-500/50' : 'text-slate-500'}`}>{task.target}</p>
-                </div>
-              </motion.li>
-            ))}
-          </ul>
-        </motion.div>
+        {isAssigned && (
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><ClipboardList className="w-5 h-5" /></div>
+              <h3 className="font-bold text-white text-lg">Prescription & Plan</h3>
+            </div>
+            <ul className="space-y-4">
+              {tasks.map((task, i) => (
+                <motion.li key={task.id} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.4 + (i * 0.1) }} className={`flex items-center gap-4 p-4 rounded-2xl transition-all cursor-pointer border ${task.done ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-white/5 border-white/5 hover:bg-white/10'}`} onClick={() => toggleTask(task.id)}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shrink-0 ${task.done ? 'bg-emerald-500 text-slate-900 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'border-2 border-slate-600'}`}>
+                    {task.done && <ShieldCheck className="w-5 h-5"/>}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`font-semibold truncate transition-all duration-300 ${task.done ? 'text-emerald-400 line-through opacity-70' : 'text-slate-200'}`}>{task.text}</p>
+                    <p className={`text-xs transition-colors ${task.done ? 'text-emerald-500/50' : 'text-slate-500'}`}>{task.target}</p>
+                  </div>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );
