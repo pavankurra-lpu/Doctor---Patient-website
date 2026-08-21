@@ -115,7 +115,7 @@ export default function PatientPortal() {
                 <div className="text-center mb-8">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600 mb-4"><ShieldCheck className="w-6 h-6" /></div>
                   <h2 className="text-xl font-bold text-slate-800 mb-2">Verify your identity</h2>
-                  <p className="text-slate-500 text-sm">We\\'ve sent a secure code to<br/><strong className="text-slate-700">{email}</strong></p>
+                  <p className="text-slate-500 text-sm">We've sent a secure code to<br/><strong className="text-slate-700">{email}</strong></p>
                 </div>
                 <div className="space-y-6">
                   <input type="text" maxLength={6} className="block w-full text-center tracking-[1em] py-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-bold text-xl" placeholder="••••••" value={otp} onChange={(e) => setOtp(e.target.value)} />
@@ -123,7 +123,7 @@ export default function PatientPortal() {
                     {isLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Verify Account'}
                   </button>
                   <p className="text-center text-sm text-slate-500 font-medium">
-                    Didn\\'t receive it? {timer > 0 ? <span className="text-slate-400">Resend in {timer}s</span> : <button onClick={handleRegister} className="text-blue-600 hover:underline">Resend Now</button>}
+                    Didn't receive it? {timer > 0 ? <span className="text-slate-400">Resend in {timer}s</span> : <button onClick={handleRegister} className="text-blue-600 hover:underline">Resend Now</button>}
                   </p>
                 </div>
               </motion.div>
@@ -199,15 +199,15 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
           </div>
           <ul className="space-y-3">
             {tasks.map(task => (
-              <li key={task.id} className={\lex items-start gap-3 p-3 rounded-xl border transition-colors \\}>
+              <li key={task.id} className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${task.done ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
                 <div className="mt-0.5 cursor-pointer" onClick={() => toggleTask(task.id)}>
-                  <div className={\w-6 h-6 rounded-md flex items-center justify-center transition-colors \\}>
+                  <div className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${task.done ? 'bg-emerald-500 text-white' : 'bg-white border-2 border-rose-300'}`}>
                     {task.done && <ShieldCheck className="w-4 h-4"/>}
                   </div>
                 </div>
                 <div className="flex-1">
-                  <p className={\ont-semibold transition-colors \\}>{task.text}</p>
-                  <p className={\	ext-xs \\}>{task.target}</p>
+                  <p className={`font-semibold transition-colors ${task.done ? 'text-emerald-700 line-through' : 'text-rose-900'}`}>{task.text}</p>
+                  <p className={`text-xs ${task.done ? 'text-emerald-600/70' : 'text-rose-700'}`}>{task.target}</p>
                 </div>
               </li>
             ))}
