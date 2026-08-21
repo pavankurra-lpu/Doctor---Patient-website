@@ -1,0 +1,46 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Enums are not supported in SQLite, so we use Strings instead
+
+model User {
+  id         String   @id @default(uuid())
+  role       String
+  name       String
+  phone      String   @unique
+  created_at DateTime @default(now())
+}
+
+model Patient {
+  id                 String   @id
+  name               String
+  phone              String   @unique
+  verified           Boolean  @default(false)
+  linked_root_id     String?
+  relationship_to_root String?
+  date_of_birth      DateTime?
+  gender             String?
+  address            String?
+  emergency_contact  String?
+  created_at         DateTime @default(now())
+}
+
+model OtpRequest {
+  id           String   @id @default(uuid())
+  target_phone String
+  otp_hash     String
+  purpose      String
+  session_id   String   @unique
+  expires_at   DateTime
+  attempts     Int      @default(0)
+  verified     Boolean  @default(false)
+  created_at   DateTime @default(now())
+}
