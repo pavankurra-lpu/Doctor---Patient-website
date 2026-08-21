@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Phone, User, ShieldCheck, ArrowRight, HeartPulse, ChevronLeft, ClipboardList, Lock, KeyRound } from 'lucide-react';
+import { Mail, User, ShieldCheck, ArrowRight, HeartPulse, ChevronLeft, ClipboardList, Lock, KeyRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function PatientPortal() {
@@ -134,7 +134,7 @@ export default function PatientPortal() {
                       <input type="text" className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} />
                     </div>
                     <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Phone className="h-5 w-5 text-slate-400" /></div>
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><Mail className="h-5 w-5 text-slate-400" /></div>
                       <input type="email" className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                     <button onClick={handleRegister} disabled={isLoading || !name || !email} className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition-all disabled:opacity-70 mt-6">
@@ -213,57 +213,71 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-slate-50 pb-24">
-      <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
-        <button onClick={onLogout} className="text-slate-500 flex items-center text-sm font-medium"><ChevronLeft className="w-4 h-4"/> Logout</button>
-        <div className="font-bold text-blue-600">{uniqueId}</div>
-      </div>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-slate-950 text-slate-100 pb-24 relative overflow-hidden font-sans">
+      
+      {/* Background Orbs (Kokonut / ReactBits Aesthetic) */}
+      <div className="absolute top-[-20%] left-[-10%] w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none" />
+      
+      <div className="max-w-md mx-auto p-6 space-y-8 mt-6 relative z-10">
+        
+        {/* Nav Bar */}
+        <div className="flex items-center justify-between">
+          <button onClick={onLogout} className="text-slate-400 hover:text-white transition flex items-center text-sm font-medium bg-white/5 px-4 py-2 rounded-full border border-white/10 hover:bg-white/10 backdrop-blur-md">
+            <ChevronLeft className="w-4 h-4 mr-1"/> Exit
+          </button>
+          <div className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 font-mono text-sm tracking-widest">{uniqueId}</div>
+        </div>
 
-      <div className="max-w-md mx-auto p-4 space-y-6 mt-4">
-        <header className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Hello, {name.split(' ')[0] || 'Patient'}</h1>
-            <p className="text-sm text-slate-500">Your Care Dashboard</p>
-          </div>
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xl">{name.charAt(0) || 'P'}</div>
+        {/* Header */}
+        <header className="flex justify-between items-end">
+          <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
+            <p className="text-sm text-slate-400 mb-1">Welcome back,</p>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">{name.split(' ')[0] || 'Patient'}</h1>
+          </motion.div>
+          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-blue-500/20 border border-white/10">{name.charAt(0) || 'P'}</div>
         </header>
 
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-lg">
-          <h2 className="text-blue-100 text-sm font-medium mb-1">Latest Results</h2>
-          <div className="flex items-baseline gap-2 mb-4">
-            <p className="text-3xl font-bold">118</p>
-            <p className="text-blue-200 text-sm">mg/dL</p>
-          </div>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-blue-200 text-xs">Last updated</p>
-              <p className="font-semibold">Today, 8:30 AM</p>
+        {/* Vitals Glass Card */}
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500" />
+          <div className="relative bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full" />
+            <h2 className="text-slate-400 text-sm font-medium mb-2 flex items-center gap-2"><HeartPulse className="w-4 h-4 text-blue-400" /> Latest Vitals</h2>
+            <div className="flex items-baseline gap-2 mb-6">
+              <p className="text-5xl font-black text-white">118</p>
+              <p className="text-slate-400 text-sm font-medium">mg/dL</p>
             </div>
-            <div className="bg-white/20 px-3 py-1 rounded-lg text-sm font-medium">Normal Range</div>
+            <div className="flex justify-between items-center pt-4 border-t border-white/5">
+              <div>
+                <p className="text-slate-500 text-xs">Updated Today</p>
+                <p className="text-sm font-medium text-slate-300">8:30 AM</p>
+              </div>
+              <div className="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold border border-emerald-500/20">Normal Range</div>
+            </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <ClipboardList className="w-5 h-5 text-blue-600" />
-            <h3 className="font-bold text-slate-800">Today's Action Plan</h3>
+        {/* Interactive Checklist (Shadcn aesthetic) */}
+        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400"><ClipboardList className="w-5 h-5" /></div>
+            <h3 className="font-bold text-white text-lg">Action Plan</h3>
           </div>
-          <ul className="space-y-3">
-            {tasks.map(task => (
-              <li key={task.id} className={`flex items-start gap-3 p-3 rounded-xl border transition-colors ${task.done ? 'bg-emerald-50 border-emerald-100' : 'bg-rose-50 border-rose-100'}`}>
-                <div className="mt-0.5 cursor-pointer" onClick={() => toggleTask(task.id)}>
-                  <div className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${task.done ? 'bg-emerald-500 text-white' : 'bg-white border-2 border-rose-300'}`}>
-                    {task.done && <ShieldCheck className="w-4 h-4"/>}
-                  </div>
+          <ul className="space-y-4">
+            {tasks.map((task, i) => (
+              <motion.li key={task.id} initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.4 + (i * 0.1) }} className={`flex items-center gap-4 p-4 rounded-2xl transition-all cursor-pointer border ${task.done ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-white/5 border-white/5 hover:bg-white/10'}`} onClick={() => toggleTask(task.id)}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shrink-0 ${task.done ? 'bg-emerald-500 text-slate-900 shadow-[0_0_15px_rgba(16,185,129,0.4)]' : 'border-2 border-slate-600'}`}>
+                  {task.done && <ShieldCheck className="w-5 h-5"/>}
                 </div>
-                <div className="flex-1">
-                  <p className={`font-semibold transition-colors ${task.done ? 'text-emerald-700 line-through' : 'text-rose-900'}`}>{task.text}</p>
-                  <p className={`text-xs ${task.done ? 'text-emerald-600/70' : 'text-rose-700'}`}>{task.target}</p>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-semibold truncate transition-all duration-300 ${task.done ? 'text-emerald-400 line-through opacity-70' : 'text-slate-200'}`}>{task.text}</p>
+                  <p className={`text-xs transition-colors ${task.done ? 'text-emerald-500/50' : 'text-slate-500'}`}>{task.target}</p>
                 </div>
-              </li>
+              </motion.li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       </div>
     </motion.div>
   );
