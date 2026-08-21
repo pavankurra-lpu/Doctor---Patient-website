@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, Search, ActivitySquare, UserPlus, Users, FileText, ChevronLeft, CheckCircle2, ChevronRight, Upload } from 'lucide-react';
+import { Building2, Search, ActivitySquare, UserPlus, Users, FileText, ChevronLeft, CheckCircle2, ChevronRight, Upload, ShieldAlert, Lock, KeyRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getPatients, savePatients, getDoctors } from './lib/mockDB';
 
 export default function AdminPortal() {
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminId, setAdminId] = useState('');
+  const [adminKey, setAdminKey] = useState('');
+
   const [activeTab, setActiveTab] = useState('new');
   const [patients, setPatients] = useState<any[]>([]);
   const [doctors, setDoctors] = useState<any[]>([]);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     // Poll local storage to simulate realtime DB sync for Vercel demo
     const load = () => {
       setPatients(getPatients());
@@ -19,7 +24,60 @@ export default function AdminPortal() {
     load();
     const int = setInterval(load, 2000);
     return () => clearInterval(int);
-  }, []);
+  }, [isAuthenticated]);
+
+  const handleLogin = () => {
+    // Strict mock credentials for demo
+    if (adminId.toUpperCase() === 'ADMIN' && adminKey === 'admin123') {
+      setIsAuthenticated(true);
+    } else {
+      alert('ACCESS DENIED: Invalid Authority Credentials');
+    }
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 font-sans text-white relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-900/20 via-slate-950 to-slate-950 -z-10" />
+        
+        <button onClick={() => navigate('/')} className="absolute top-6 left-6 flex items-center text-slate-400 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-full border border-white/10">
+          <ChevronLeft className="w-4 h-4 mr-1" /> Return
+        </button>
+
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden w-full max-w-md border border-emerald-500/30 relative">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-600 to-teal-400" />
+          
+          <div className="p-8">
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl animate-pulse" />
+                <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl relative z-10"><ShieldAlert className="w-10 h-10 text-emerald-400" /></div>
+              </div>
+            </div>
+            
+            <h1 className="text-2xl font-black text-center mb-1 text-emerald-400 tracking-wider uppercase">Restricted Area</h1>
+            <p className="text-center text-slate-400 text-sm mb-8 font-mono">Hospital Authority Access Only</p>
+            
+            <div className="space-y-4">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><UserPlus className="h-5 w-5 text-emerald-500/50" /></div>
+                <input type="text" className="w-full pl-11 pr-4 py-3 bg-black/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-mono uppercase placeholder:normal-case" placeholder="Authority ID (Use: ADMIN)" value={adminId} onChange={e => setAdminId(e.target.value)} />
+              </div>
+              
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><KeyRound className="h-5 w-5 text-emerald-500/50" /></div>
+                <input type="password" className="w-full pl-11 pr-4 py-3 bg-black/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-mono placeholder:normal-case" placeholder="Security Key (Use: admin123)" value={adminKey} onChange={e => setAdminKey(e.target.value)} />
+              </div>
+
+              <button onClick={handleLogin} className="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-bold mt-6 shadow-[0_0_20px_rgba(5,150,105,0.4)] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm">
+                <Lock className="w-4 h-4" /> Authenticate
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   const newPatients = patients.filter(p => p.status === 'new_registration');
   const queue = patients.filter(p => p.status === 'queue').sort((a, b) => a.name.localeCompare(b.name));
