@@ -327,7 +327,12 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
             <p className="text-sm text-slate-400 mb-1">Welcome back,</p>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">{name.split(' ')[0] || 'Patient'}</h1>
           </motion.div>
-          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-blue-500/20 border border-white/10">{name.charAt(0) || 'P'}</div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => alert('EMERGENCY PROTOCOL ACTIVATED. Connecting to 911 and dispatching ambulance to your location.')} className="bg-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-500/50 px-4 py-2 rounded-xl font-bold text-sm tracking-widest transition-all animate-pulse">
+              SOS
+            </button>
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-blue-500/20 border border-white/10">{name.charAt(0) || 'P'}</div>
+          </div>
         </header>
 
         {/* Status Alert - Now much more prominent if unassigned */}

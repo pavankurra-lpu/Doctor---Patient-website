@@ -136,6 +136,38 @@ export default function AdminPortal() {
           </div>
         </header>
 
+        {/* Hospital Capacity Widget */}
+        <div className="grid grid-cols-4 gap-4 mb-8">
+          <div className="bg-slate-900/50 border border-white/10 p-4 rounded-2xl flex items-center gap-4">
+            <div className="p-3 bg-blue-500/20 text-blue-400 rounded-xl"><Building2 className="w-6 h-6"/></div>
+            <div>
+              <p className="text-slate-400 text-xs font-bold uppercase">Total Beds</p>
+              <p className="text-2xl font-black">450</p>
+            </div>
+          </div>
+          <div className="bg-slate-900/50 border border-white/10 p-4 rounded-2xl flex items-center gap-4">
+            <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl"><ActivitySquare className="w-6 h-6"/></div>
+            <div>
+              <p className="text-slate-400 text-xs font-bold uppercase">Available</p>
+              <p className="text-2xl font-black">{450 - onboard.length - queue.length}</p>
+            </div>
+          </div>
+          <div className="bg-slate-900/50 border border-white/10 p-4 rounded-2xl flex items-center gap-4">
+            <div className="p-3 bg-rose-500/20 text-rose-400 rounded-xl"><ShieldAlert className="w-6 h-6"/></div>
+            <div>
+              <p className="text-slate-400 text-xs font-bold uppercase">Critical ICU</p>
+              <p className="text-2xl font-black">12/50</p>
+            </div>
+          </div>
+          <div className="bg-slate-900/50 border border-white/10 p-4 rounded-2xl flex items-center gap-4">
+            <div className="p-3 bg-indigo-500/20 text-indigo-400 rounded-xl"><Users className="w-6 h-6"/></div>
+            <div>
+              <p className="text-slate-400 text-xs font-bold uppercase">Doctors On Duty</p>
+              <p className="text-2xl font-black">{doctors.length}</p>
+            </div>
+          </div>
+        </div>
+
         <AnimatePresence mode="wait">
           {activeTab === 'new' && (
             <motion.div key="new" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="grid gap-4">
