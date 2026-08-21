@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, User, ShieldCheck, ArrowRight, HeartPulse, ChevronLeft, ClipboardList, Lock, KeyRound } from 'lucide-react';
+import { Mail, User, ShieldCheck, ArrowRight, HeartPulse, ChevronLeft, ClipboardList, Lock, KeyRound, ActivitySquare, Clock, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { getPatients, savePatients } from './lib/mockDB';
 
 export default function PatientPortal() {
   const navigate = useNavigate();
@@ -14,6 +15,11 @@ export default function PatientPortal() {
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
+  
+  // Medical Details
+  const [illness, setIllness] = useState('');
+  const [duration, setDuration] = useState('');
+  const [severity, setSeverity] = useState('Moderate');
   
   // Login State
   const [loginId, setLoginId] = useState('');
@@ -35,7 +41,7 @@ export default function PatientPortal() {
     setIsLoading(true);
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    const generatedId = (name.substring(0, 2) || 'XX').toUpperCase() + '0826';
+    const generatedId = (name.substring(0, 2) || 'XX').toUpperCase() + Math.floor(1000 + Math.random() * 9000).toString();
     setSessionId('mock-session');
     setUniqueId(generatedId);
     
@@ -54,7 +60,7 @@ export default function PatientPortal() {
     await new Promise(resolve => setTimeout(resolve, 800));
     
     if (otp === (window as any)._mockOtp) {
-      setStep(3); // Go to Set Password step
+      setStep(3);
     } else {
       alert('Invalid OTP. Please try again.');
     }
@@ -66,9 +72,32 @@ export default function PatientPortal() {
       alert('Password must be at least 4 characters');
       return;
     }
+    setStep(4);
+  };
+
+  const handleCompleteRegistration = () => {
+    if (!illness || !duration) {
+      alert('Please fill out all medical details so we can assign the right doctor.');
+      return;
+    }
+    
     // Save to localStorage for future logins
     localStorage.setItem('careloop_user_' + uniqueId, JSON.stringify({ name, password }));
-    setStep(4);
+    
+    // Push to global mock DB for Admin to see
+    const patients = getPatients();
+    patients.push({
+      uniqueId,
+      name,
+      illness: `${illness} (Duration: ${duration} | Severity: ${severity})`,
+      status: 'new_registration',
+      testResults: [],
+      lastVisit: new Date().toISOString(),
+      assignedDoctor: null
+    });
+    savePatients(patients);
+
+    setStep(5);
   };
 
   const handleLogin = async () => {
@@ -80,7 +109,7 @@ export default function PatientPortal() {
       if (data.password === loginPassword) {
         setName(data.name);
         setUniqueId(loginId.toUpperCase());
-        setStep(4);
+        setStep(5);
       } else {
         alert('Incorrect password');
       }
@@ -90,7 +119,7 @@ export default function PatientPortal() {
     setIsLoading(false);
   };
 
-  if (step === 4) {
+  if (step === 5) {
     return <Dashboard name={name} uniqueId={uniqueId} onLogout={() => { setStep(1); setMode('login'); setLoginPassword(''); }} />
   }
 
@@ -119,8 +148,6 @@ export default function PatientPortal() {
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div key="step1" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}>
-                
-                {/* Mode Toggle */}
                 <div className="flex bg-slate-100 p-1 rounded-xl mb-6">
                   <button onClick={() => setMode('login')} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors ${mode === 'login' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`}>Login</button>
                   <button onClick={() => setMode('register')} className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-colors ${mode === 'register' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-500'}`}>Register</button>
@@ -192,7 +219,37 @@ export default function PatientPortal() {
                   <input type="password" className="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white" placeholder="Create a password" value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 
-                <button onClick={handleSetPassword} disabled={password.length < 4} className="w-full bg-slate-900 text-white font-semibold py-3 px-4 rounded-xl shadow-lg disabled:opacity-70">Complete Registration</button>
+                <button onClick={handleSetPassword} disabled={password.length < 4} className="w-full bg-slate-900 text-white font-semibold py-3 px-4 rounded-xl shadow-lg disabled:opacity-70">Next <ArrowRight className="w-4 h-4 inline-block ml-1" /></button>
+              </motion.div>
+            )}
+
+            {step === 4 && (
+              <motion.div key="step4" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-rose-100 text-rose-500 mb-4 shadow-inner"><ActivitySquare className="w-8 h-8" /></div>
+                <h2 className="text-2xl font-bold text-slate-800 mb-2">Medical Profile</h2>
+                <p className="text-slate-500 mb-6 text-sm">Please detail your symptoms so we can triage and assign the best specialist.</p>
+
+                <div className="space-y-4 mb-6 text-left">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Root Problem / Illness</label>
+                    <input type="text" className="block w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-blue-500" placeholder="E.g., Severe stomach pain" value={illness} onChange={(e) => setIllness(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Duration of symptoms</label>
+                    <input type="text" className="block w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-blue-500" placeholder="E.g., 3 days, 2 weeks" value={duration} onChange={(e) => setDuration(e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Level of Concern</label>
+                    <select className="block w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-blue-500" value={severity} onChange={(e) => setSeverity(e.target.value)}>
+                      <option>Mild / Routine Checkup</option>
+                      <option>Moderate</option>
+                      <option>Severe</option>
+                      <option>Critical / Urgent</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <button onClick={handleCompleteRegistration} disabled={illness.length < 3 || duration.length < 1} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg transition-all disabled:opacity-70">Submit to Triage</button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -209,18 +266,27 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
   ]);
 
   const [patientData, setPatientData] = useState<any>(null);
+  const [hasNotified, setHasNotified] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
-    // Poll the mock DB to check if Admin has assigned a doctor yet
     const checkStatus = () => {
       const allPatients = getPatients();
       const current = allPatients.find((p: any) => p.uniqueId === uniqueId);
-      if (current) setPatientData(current);
+      if (current) {
+        // If they just got assigned a doctor and we haven't notified them yet
+        if (current.assignedDoctor && !hasNotified && current.status !== 'new_registration') {
+          setHasNotified(true);
+          setShowNotification(true);
+          setTimeout(() => setShowNotification(false), 8000); // Hide after 8s
+        }
+        setPatientData(current);
+      }
     };
     checkStatus();
     const int = setInterval(checkStatus, 2000);
     return () => clearInterval(int);
-  }, [uniqueId]);
+  }, [uniqueId, hasNotified]);
 
   const toggleTask = (id: number) => {
     setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
@@ -234,6 +300,19 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
       <div className="absolute top-[-20%] left-[-10%] w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none" />
       
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {showNotification && (
+          <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -50 }} className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] bg-emerald-500 text-slate-950 px-6 py-4 rounded-2xl shadow-[0_10px_40px_rgba(16,185,129,0.3)] flex items-center gap-4">
+            <div className="bg-slate-950/10 p-2 rounded-full"><ShieldCheck className="w-6 h-6" /></div>
+            <div>
+              <h4 className="font-black">Doctor Assigned!</h4>
+              <p className="text-sm font-medium">You have been assigned to {patientData?.assignedDoctor}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-md mx-auto p-6 space-y-8 mt-6 relative z-10">
         
         <div className="flex items-center justify-between">
@@ -251,27 +330,33 @@ function Dashboard({ name, uniqueId, onLogout }: any) {
           <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-xl shadow-blue-500/20 border border-white/10">{name.charAt(0) || 'P'}</div>
         </header>
 
-        {/* Status Alert */}
-        {!isAssigned && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 flex items-start gap-3">
-            <div className="mt-0.5 text-yellow-500 animate-pulse"><ActivitySquare className="w-5 h-5" /></div>
-            <div>
-              <h3 className="font-bold text-yellow-500 text-sm">Awaiting Doctor Assignment</h3>
-              <p className="text-xs text-yellow-500/70 mt-1">Your case is currently being reviewed by the Hospital Authority. Your full care plan will appear here once a doctor is assigned.</p>
+        {/* Status Alert - Now much more prominent if unassigned */}
+        {!isAssigned ? (
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-amber-500/10 border border-amber-500/30 rounded-3xl p-8 text-center relative overflow-hidden mt-8">
+            <div className="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none" />
+            <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+              <Clock className="w-8 h-8 text-amber-500" />
+            </div>
+            <h3 className="text-xl font-bold text-amber-500 mb-2">Awaiting Hospital Authority</h3>
+            <p className="text-amber-500/70 text-sm leading-relaxed mb-6">
+              Your registration is complete. We are currently reviewing your illness profile to assign the most appropriate Doctor for your case.
+            </p>
+            <div className="inline-flex items-center gap-2 bg-amber-500/20 px-4 py-2 rounded-full border border-amber-500/30">
+              <div className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+              <span className="text-xs font-bold text-amber-500 uppercase tracking-widest">Please Wait In Queue</span>
             </div>
           </motion.div>
-        )}
-
-        {isAssigned && patientData?.assignedDoctor && (
+        ) : (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-3">
             <div className="text-emerald-500"><ShieldCheck className="w-5 h-5" /></div>
             <div>
               <h3 className="font-bold text-emerald-500 text-sm">Doctor Assigned</h3>
-              <p className="text-xs text-emerald-500/70 mt-0.5">You are under the care of <strong className="text-emerald-400">{patientData.assignedDoctor}</strong></p>
+              <p className="text-xs text-emerald-500/70 mt-0.5">You are under the care of <strong className="text-emerald-400">{patientData?.assignedDoctor}</strong></p>
             </div>
           </motion.div>
         )}
 
+        {/* Vitals Glass Card */}
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="relative group">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-3xl blur opacity-30 group-hover:opacity-50 transition duration-500" />
           <div className="relative bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 overflow-hidden">
