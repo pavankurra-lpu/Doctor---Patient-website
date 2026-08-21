@@ -25,40 +25,36 @@ export default function PatientPortal() {
 
   const handleRegister = async () => {
     setIsLoading(true);
-    try {
-      const res = await fetch('http://localhost:3000/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email })
-      });
-      const data = await res.json();
-      setSessionId(data.registration_session_id);
-      alert('[DEV MODE] The backend generated this OTP for you: ' + data.dev_otp);
-      setTimer(60);
-      setStep(2);
-    } catch (e) {
-      alert('Failed to send OTP');
-    }
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Generate a mock unique ID
+    const generatedId = (name.substring(0, 2) || 'XX').toUpperCase() + '0826';
+    
+    setSessionId('mock-session');
+    setUniqueId(generatedId);
+    
+    // Simulate email OTP logic purely in frontend for the Vercel demo
+    const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    alert('[VERCEL DEMO] A real backend would email this. For now, your OTP is: ' + mockOtp);
+    
+    // Store it temporarily in window object to verify in next step
+    (window as any)._mockOtp = mockOtp;
+    
+    setTimer(60);
+    setStep(2);
     setIsLoading(false);
   };
 
   const handleVerify = async () => {
     setIsLoading(true);
-    try {
-      const res = await fetch('http://localhost:3000/auth/register/verify-otp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ registration_session_id: sessionId, otp })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setUniqueId(data.unique_id);
-        setStep(3);
-      } else {
-        alert(data.error || 'Invalid OTP');
-      }
-    } catch (e) {
-      alert('Verification failed');
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Verify against the mock OTP we stored
+    if (otp === (window as any)._mockOtp) {
+      setStep(3);
+    } else {
+      alert('Invalid OTP. Please try again.');
     }
     setIsLoading(false);
   };
